@@ -51,3 +51,15 @@ export interface ScoreBatHighlight {
         embed: string;
     }[];
 }
+
+export interface Standing {
+  rank: number;
+  team: Team;
+  points: number;
+  played: number;
+  win: number;
+  draw: number;
+  lose: number;
+  goalDifference: number;
+}
+

@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Clapperboard } from 'lucide-react';
+import { Clapperboard, Medal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 
 const navLinks = [
   { href: '/', label: 'Live Matches', icon: FutbolIcon },
   { href: '/highlights', label: 'Highlights', icon: Clapperboard },
+  { href: '/standings', label: 'Standings', icon: Medal },
 ];
 
 function FutbolIcon(props: React.SVGProps<SVGSVGElement>) {
