@@ -25,25 +25,6 @@ export default function MatchLoading() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Event Timeline Skeleton */}
-          <Card>
-            <CardHeader><Skeleton className="h-8 w-48" /></CardHeader>
-            <CardContent className="space-y-6">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <div className="flex flex-col items-center gap-1">
-                    <Skeleton className="h-7 w-10" />
-                    <Skeleton className="h-5 w-5 rounded-full" />
-                  </div>
-                  <div className="flex-1 pb-4">
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-4 w-48 mt-2" />
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
         </div>
 
         <div className="space-y-8 mt-8 lg:mt-0">

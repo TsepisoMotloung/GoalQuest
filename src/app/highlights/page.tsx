@@ -7,6 +7,8 @@ import { Clapperboard } from 'lucide-react';
 import { getHighlights } from '@/lib/scorebat';
 import { HighlightFilter } from './highlight-filter';
 
+export const revalidate = 60; // Revalidate every 60 seconds
+
 export default async function HighlightsPage({ searchParams }: { searchParams?: { league?: string } }) {
   const highlights = await getHighlights();
   const heroImage = getPlaceholderImage('hero-highlights');
@@ -45,7 +47,7 @@ export default async function HighlightsPage({ searchParams }: { searchParams?: 
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredHighlights.map(highlight => (
+        {filteredHighlights.length > 0 ? filteredHighlights.map(highlight => (
             <Link href={`/${highlight.matchId}`} key={highlight.id}>
               <Card className="overflow-hidden h-full flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <CardHeader className="p-0 relative">
@@ -55,6 +57,7 @@ export default async function HighlightsPage({ searchParams }: { searchParams?: 
                       alt={highlight.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized // Scorebat images are not on a configured domain
                       data-ai-hint="football highlight"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
@@ -74,8 +77,11 @@ export default async function HighlightsPage({ searchParams }: { searchParams?: 
                 </CardFooter>
               </Card>
             </Link>
-        ))}
+        )) : (
+          <p className="text-center col-span-full">No highlights available at the moment. Check back soon!</p>
+        )}
       </div>
     </div>
   );
 }
+

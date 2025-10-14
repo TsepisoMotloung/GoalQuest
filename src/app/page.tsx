@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -27,25 +27,57 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { matches, leagues } from '@/app/lib/data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { getMatches } from '@/lib/scorebat';
+import type { Match } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function MatchRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell className="w-2/5">
+        <div className="flex items-center gap-4 font-medium">
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-4 w-24" />
+          <span className="text-muted-foreground">vs</span>
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </TableCell>
+      <TableCell className="w-1/5 text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+      <TableCell className="w-1/5 text-center"><Skeleton className="h-6 w-16 mx-auto" /></TableCell>
+      <TableCell className="w-1/5 text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+    </TableRow>
+  );
+}
+
 
 export default function Home() {
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLeague, setSelectedLeague] = useState('all');
+  const [leagues, setLeagues] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchMatches() {
+      setLoading(true);
+      const fetchedMatches = await getMatches();
+      setMatches(fetchedMatches);
+      const uniqueLeagues = [...new Set(fetchedMatches.map(m => m.league.name))];
+      setLeagues(uniqueLeagues);
+      setLoading(false);
+    }
+    fetchMatches();
+  }, []);
 
   const filteredMatches = matches.filter(match => {
     const team1Name = match.team1.name.toLowerCase();
     const team2Name = match.team2.name.toLowerCase();
     const term = searchTerm.toLowerCase();
-    const leagueFilter = selectedLeague === 'all' || match.league.id === selectedLeague;
+    const leagueFilter = selectedLeague === 'all' || match.league.name === selectedLeague;
 
     return (team1Name.includes(term) || team2Name.includes(term)) && leagueFilter;
   });
-
-  const getTeamLogo = (logoId: string) => {
-    return PlaceHolderImages.find(img => img.id === logoId)?.imageUrl || 'https://picsum.photos/seed/placeholder/40/40';
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -62,15 +94,15 @@ export default function Home() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
-            <Select value={selectedLeague} onValueChange={setSelectedLeague}>
+            <Select value={selectedLeague} onValueChange={setSelectedLeague} disabled={loading}>
               <SelectTrigger className="w-full md:w-[200px]">
                 <SelectValue placeholder="Filter by league" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Leagues</SelectItem>
                 {leagues.map(league => (
-                  <SelectItem key={league.id} value={league.id}>
-                    {league.name}
+                  <SelectItem key={league} value={league}>
+                    {league}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -88,18 +120,26 @@ export default function Home() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMatches.length > 0 ? (
+                {loading ? (
+                  <>
+                    <MatchRowSkeleton />
+                    <MatchRowSkeleton />
+                    <MatchRowSkeleton />
+                    <MatchRowSkeleton />
+                    <MatchRowSkeleton />
+                  </>
+                ) : filteredMatches.length > 0 ? (
                   filteredMatches.map(match => (
                     <TableRow key={match.id} className="hover:bg-primary/10 cursor-pointer">
                       <TableCell>
                         <Link href={`/${match.id}`} className="flex items-center gap-4 font-medium">
                           <div className="flex items-center gap-2">
-                            <Image src={getTeamLogo(match.team1.logoId)} alt={match.team1.name} width={24} height={24} className="rounded-full" data-ai-hint="team logo"/>
+                            <Image src={match.team1.logoUrl} alt={match.team1.name} width={24} height={24} className="rounded-full bg-muted" data-ai-hint="team logo"/>
                             <span>{match.team1.name}</span>
                           </div>
                           <span className="text-muted-foreground">vs</span>
                           <div className="flex items-center gap-2">
-                             <Image src={getTeamLogo(match.team2.logoId)} alt={match.team2.name} width={24} height={24} className="rounded-full" data-ai-hint="team logo"/>
+                             <Image src={match.team2.logoUrl} alt={match.team2.name} width={24} height={24} className="rounded-full bg-muted" data-ai-hint="team logo"/>
                             <span>{match.team2.name}</span>
                           </div>
                         </Link>
@@ -114,7 +154,7 @@ export default function Home() {
                           {match.status === 'Live' ? (
                             <div className="flex flex-col items-center">
                               <Badge variant="destructive" className="animate-pulse">LIVE</Badge>
-                              <span className="text-sm text-muted-foreground">{match.minute}'</span>
+                              {match.minute && <span className="text-sm text-muted-foreground">{match.minute}'</span>}
                             </div>
                           ) : (
                             <Badge variant="secondary">{match.status}</Badge>

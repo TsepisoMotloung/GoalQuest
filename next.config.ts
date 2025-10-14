@@ -33,7 +33,19 @@ const nextConfig: NextConfig = {
         hostname: 'img.scorebat.com',
         port: '',
         pathname: '/**',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 's1.scorebat.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 's2.scorebat.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

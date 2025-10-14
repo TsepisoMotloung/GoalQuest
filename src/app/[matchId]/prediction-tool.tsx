@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { getMatchInsights, type FormState } from '@/app/actions';
 import type { Match } from '@/lib/types';
 import { Wand2, BrainCircuit, BotMessageSquare, Percent, BarChart } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -32,6 +32,8 @@ const initialState: FormState = {
 export function PredictionTool({ match }: { match: Match }) {
   const [state, formAction] = useFormState(getMatchInsights, initialState);
   const { toast } = useToast();
+   const { pending } = useFormStatus();
+
 
    useEffect(() => {
     if (!state.success && state.message) {
@@ -60,15 +62,27 @@ export function PredictionTool({ match }: { match: Match }) {
             <Input name="team2Name" defaultValue={match.team2.name} />
             <Input name="matchDate" defaultValue={new Date(match.date).toISOString().split('T')[0]} />
             <Input name="leagueName" defaultValue={match.league.name} />
-            <Textarea name="pastResults" defaultValue="Team1 2-0, Draw 1-1, Team2 3-1" />
-            <Textarea name="team1Stats" defaultValue="Last 5: W-W-L-D-W, Top Scorer: M. Rashford (2 goals)" />
-            <Textarea name="team2Stats" defaultValue="Last 5: L-W-W-D-L, Top Scorer: R. Sterling (1 goal)" />
+            <Textarea name="pastResults" defaultValue="Data not available" />
+            <Textarea name="team1Stats" defaultValue="Data not available" />
+            <Textarea name="team2Stats" defaultValue="Data not available" />
         </CardContent>
         <CardFooter>
           <SubmitButton />
         </CardFooter>
       </form>
       
+       {pending && !state.data && (
+        <CardContent className="mt-4 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
+      )}
+
       {state.data && (
         <CardContent className="mt-4 space-y-4">
             <Alert>
