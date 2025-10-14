@@ -1,3 +1,4 @@
+
 import { getPlaceholderImage } from '@/lib/utils';
 import type { NewsArticle } from '@/lib/types';
 
@@ -47,7 +48,7 @@ export const mockNews: NewsArticle[] = [
         title: 'Youth Spotlight: The Next Generation of Superstars',
         source: 'Goal.com',
         date: '2024-08-30T15:00:00Z',
-        imageUrl: getPlaceholder.photos/seed/young-talent/800/450',
+        imageUrl: 'https://picsum.photos/seed/young-talent/800/450',
         imageHint: 'young soccer player',
         url: '#',
         summary: 'We profile five young talents who are poised to take the football world by storm in the coming years.'
