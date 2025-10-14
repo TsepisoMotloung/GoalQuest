@@ -54,28 +54,23 @@ function StandingsRowSkeleton() {
 
 
 export default function StandingsPage() {
-  const [selectedLeague, setSelectedLeague] = useState(leagues[0].id);
+  const [selectedLeague, setSelectedLeague] = useState(leagues[0].name);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [year, setYear] = useState(new Date().getFullYear().toString());
-
 
   useEffect(() => {
     async function fetchStandings() {
       setLoading(true);
-      const fetchedStandings = await getStandings(selectedLeague, year);
+      const fetchedStandings = await getStandings(selectedLeague);
       setStandings(fetchedStandings);
       setLoading(false);
     }
     fetchStandings();
-  }, [selectedLeague, year]);
+  }, [selectedLeague]);
 
-  const handleLeagueChange = (leagueId: string) => {
-    setSelectedLeague(leagueId);
+  const handleLeagueChange = (leagueName: string) => {
+    setSelectedLeague(leagueName);
   };
-  
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -87,28 +82,16 @@ export default function StandingsPage() {
                 <Medal className="text-primary" />
                 League Standings
               </CardTitle>
-              <CardDescription>View the current and past tables for top leagues.</CardDescription>
+              <CardDescription>View the current tables for top leagues.</CardDescription>
             </div>
             <div className="flex gap-2">
-                 <Select value={year} onValueChange={setYear}>
-                    <SelectTrigger className="w-full md:w-[120px]">
-                        <SelectValue placeholder="Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {years.map(y => (
-                        <SelectItem key={y} value={y.toString()}>
-                            {y}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
                 <Select value={selectedLeague} onValueChange={handleLeagueChange}>
                 <SelectTrigger className="w-full md:w-[240px]">
                     <SelectValue placeholder="Select a league" />
                 </SelectTrigger>
                 <SelectContent>
                     {leagues.map(league => (
-                    <SelectItem key={league.id} value={league.id}>
+                    <SelectItem key={league.id} value={league.name}>
                         {league.name}
                     </SelectItem>
                     ))}
@@ -156,7 +139,7 @@ export default function StandingsPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center h-24">
-                      Standings for this league and season are not available yet.
+                      Standings for this league and season are not available.
                     </TableCell>
                   </TableRow>
                 )}

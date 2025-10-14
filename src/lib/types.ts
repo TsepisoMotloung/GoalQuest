@@ -74,3 +74,21 @@ export interface NewsArticle {
     summary: string;
 }
 
+
+// football98 API Types
+export interface Football98Standing {
+  [teamName: string]: {
+    Played: string;
+    Winned: string;
+    Drawn: string;
+    Loosed: string;
+    'Goal For': string;
+    'Goal Against': string;
+    'Goal Difference': string;
+    Points: string;
+  };
+}
+
+export interface Football98Response {
+  Table: Football98Standing[];
+}
