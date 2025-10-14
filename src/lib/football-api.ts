@@ -1,6 +1,7 @@
 
 import axios from 'axios';
-import type { Standing, Football98Standing, Football98Response } from './types';
+import type { Standing } from './lib/types';
+import type { Football98Standing, Football98Response } from './types';
 
 const API_FOOTBALL_URL = 'https://football98.p.rapidapi.com';
 
@@ -46,6 +47,11 @@ export const getStandings = async (leagueName: string): Promise<Standing[]> => {
   const leaguePath = leaguePathMap[leagueName];
   if (!leaguePath) {
     console.error(`Invalid league name for football98 API: ${leagueName}`);
+    return [];
+  }
+
+  if (!process.env.FOOTBALL_API_KEY || !process.env.FOOTBALL_API_HOST) {
+    console.error("Football API key or host is not set. Returning empty array.");
     return [];
   }
 
