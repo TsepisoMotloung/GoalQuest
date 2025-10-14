@@ -1,3 +1,82 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-highlights",
+      "description": "A football stadium seen from the stands.",
+      "imageUrl": "https://picsum.photos/seed/hero-highlights/1200/400",
+      "imageHint": "football stadium"
+    },
+    {
+      "id": "team-logo-mu",
+      "description": "Manchester United Logo Placeholder",
+      "imageUrl": "https://picsum.photos/seed/mu/100/100",
+      "imageHint": "team logo"
+    },
+    {
+      "id": "team-logo-chelsea",
+      "description": "Chelsea FC Logo Placeholder",
+      "imageUrl": "https://picsum.photos/seed/chelsea/100/100",
+      "imageHint": "team logo"
+    },
+    {
+      "id": "team-logo-liv",
+      "description": "Liverpool FC Logo Placeholder",
+      "imageUrl": "https://picsum.photos/seed/liv/100/100",
+      "imageHint": "team logo"
+    },
+    {
+      "id": "team-logo-mc",
+      "description": "Manchester City Logo Placeholder",
+      "imageUrl": "https://picsum.photos/seed/mc/100/100",
+      "imageHint": "team logo"
+    },
+    {
+      "id": "team-logo-ars",
+      "description": "Arsenal FC Logo Placeholder",
+      "imageUrl": "https://picsum.photos/seed/ars/100/100",
+      "imageHint": "team logo"
+    },
+    {
+      "id": "team-logo-th",
+      "description": "Tottenham Hotspur Logo Placeholder",
+      "imageUrl": "https://picsum.photos/seed/th/100/100",
+      "imageHint": "team logo"
+    },
+    {
+      "id": "highlight-thumb-1",
+      "description": "Thumbnail for a great goal highlight.",
+      "imageUrl": "https://picsum.photos/seed/goal1/600/400",
+      "imageHint": "football goal"
+    },
+    {
+      "id": "highlight-thumb-2",
+      "description": "Thumbnail for a skillful play.",
+      "imageUrl": "https://picsum.photos/seed/skill2/600/400",
+      "imageHint": "football action"
+    },
+    {
+      "id": "highlight-thumb-3",
+      "description": "Thumbnail for a dramatic save.",
+      "imageUrl": "https://picsum.photos/seed/save3/600/400",
+      "imageHint": "goalkeeper save"
+    },
+    {
+      "id": "highlight-thumb-4",
+      "description": "Thumbnail for a controversial moment.",
+      "imageUrl": "https://picsum.photos/seed/foul4/600/400",
+      "imageHint": "football foul"
+    },
+    {
+      "id": "highlight-thumb-5",
+      "description": "Thumbnail for a last-minute winner.",
+      "imageUrl": "https://picsum.photos/seed/winner5/600/400",
+      "imageHint": "football celebration"
+    },
+    {
+      "id": "highlight-thumb-6",
+      "description": "Thumbnail for a red card decision.",
+      "imageUrl": "https://picsum.photos/seed/redcard6/600/400",
+      "imageHint": "referee card"
+    }
+  ]
 }
