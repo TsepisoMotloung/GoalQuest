@@ -172,21 +172,16 @@ export default function MatchPage({ params }: Props) {
         </div>
 
         <div className="space-y-8 mt-8 lg:mt-0">
-          {/* Video Highlights */}
+          {/* Video Highlights Embed */}
           <Card className="overflow-hidden group">
             <CardHeader>
               <CardTitle className="font-headline">Highlights</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="aspect-video relative rounded-lg overflow-hidden cursor-pointer">
-                <Image src={videoThumbnail.imageUrl} alt={videoThumbnail.description} fill className="object-cover group-hover:scale-105 transition-transform duration-300" data-ai-hint={videoThumbnail.imageHint} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <PlayCircle className="w-16 h-16 text-white/80 group-hover:text-white group-hover:scale-110 transition-all duration-300" />
-                </div>
-                <div className="absolute bottom-2 left-4 text-white font-semibold">
-                    <p>Watch all key moments</p>
-                </div>
+              <div 
+                className="aspect-video relative rounded-lg overflow-hidden"
+                dangerouslySetInnerHTML={{ __html: `<iframe src="https://www.scorebat.com/embed/g/1536965/?token=${process.env.SCOREBAT_EMBED_TOKEN}" frameborder="0" width="560" height="650" allowfullscreen allow='autoplay; fullscreen' style="width:100%;height:100%;position:absolute;left:0px;top:0px;overflow:hidden;" class="_scorebatEmbeddedPlayer_"></iframe>`}}
+              >
               </div>
             </CardContent>
           </Card>

@@ -1,26 +1,22 @@
-'use client';
-import { useState } from 'react';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { highlights, leagues } from '@/app/lib/data';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Clapperboard } from 'lucide-react';
+import { getHighlights } from '@/lib/scorebat';
+import { HighlightFilter } from './highlight-filter';
 
-export default function HighlightsPage() {
-  const [selectedLeague, setSelectedLeague] = useState('all');
+export default async function HighlightsPage({ searchParams }: { searchParams?: { league?: string } }) {
+  const highlights = await getHighlights();
   const heroImage = getPlaceholderImage('hero-highlights');
+  
+  const allLeagues = [...new Set(highlights.map(h => h.league))];
+
+  const selectedLeague = searchParams?.league || 'all';
 
   const filteredHighlights = highlights.filter(highlight => {
-    const leagueMatch = leagues.find(l => l.name === highlight.league);
-    return selectedLeague === 'all' || leagueMatch?.id === selectedLeague;
+    return selectedLeague === 'all' || highlight.league === selectedLeague;
   });
 
   return (
@@ -45,35 +41,21 @@ export default function HighlightsPage() {
       </div>
 
       <div className="mb-6 flex justify-end">
-        <Select value={selectedLeague} onValueChange={setSelectedLeague}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Filter by league" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Leagues</SelectItem>
-            {leagues.map(league => (
-              <SelectItem key={league.id} value={league.id}>
-                {league.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <HighlightFilter leagues={allLeagues} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredHighlights.map(highlight => {
-          const thumbnail = getPlaceholderImage(highlight.thumbnailId);
-          return (
+        {filteredHighlights.map(highlight => (
             <Link href={`/${highlight.matchId}`} key={highlight.id}>
               <Card className="overflow-hidden h-full flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <CardHeader className="p-0 relative">
                   <div className="aspect-video relative">
                     <Image
-                      src={thumbnail.imageUrl}
-                      alt={thumbnail.description}
+                      src={highlight.thumbnail}
+                      alt={highlight.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      data-ai-hint={thumbnail.imageHint}
+                      data-ai-hint="football highlight"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
                     <div className="absolute top-2 right-2 bg-primary/80 text-primary-foreground rounded-full p-2 backdrop-blur-sm">
@@ -92,8 +74,7 @@ export default function HighlightsPage() {
                 </CardFooter>
               </Card>
             </Link>
-          );
-        })}
+        ))}
       </div>
     </div>
   );
