@@ -45,37 +45,37 @@
     {
       "id": "highlight-thumb-1",
       "description": "Thumbnail for a great goal highlight.",
-      "imageUrl": "https://picsum.photos/seed/goal1/600/400",
+      "imageUrl": "https://picsum.photos/seed/goal1/800/450",
       "imageHint": "football goal"
     },
     {
       "id": "highlight-thumb-2",
       "description": "Thumbnail for a skillful play.",
-      "imageUrl": "https://picsum.photos/seed/skill2/600/400",
+      "imageUrl": "https://picsum.photos/seed/skill2/800/450",
       "imageHint": "football action"
     },
     {
       "id": "highlight-thumb-3",
       "description": "Thumbnail for a dramatic save.",
-      "imageUrl": "https://picsum.photos/seed/save3/600/400",
+      "imageUrl": "https://picsum.photos/seed/save3/800/450",
       "imageHint": "goalkeeper save"
     },
     {
       "id": "highlight-thumb-4",
       "description": "Thumbnail for a controversial moment.",
-      "imageUrl": "https://picsum.photos/seed/foul4/600/400",
+      "imageUrl": "https://picsum.photos/seed/foul4/800/450",
       "imageHint": "football foul"
     },
     {
       "id": "highlight-thumb-5",
       "description": "Thumbnail for a last-minute winner.",
-      "imageUrl": "https://picsum.photos/seed/winner5/600/400",
+      "imageUrl": "https://picsum.photos/seed/winner5/800/450",
       "imageHint": "football celebration"
     },
     {
       "id": "highlight-thumb-6",
       "description": "Thumbnail for a red card decision.",
-      "imageUrl": "https://picsum.photos/seed/redcard6/600/400",
+      "imageUrl": "https://picsum.photos/seed/redcard6/800/450",
       "imageHint": "referee card"
     }
   ]
