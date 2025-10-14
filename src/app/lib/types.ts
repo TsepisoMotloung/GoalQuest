@@ -51,3 +51,48 @@ export interface ScoreBatHighlight {
         embed: string;
     }[];
 }
+
+export interface Standing {
+  rank: number;
+  team: Team;
+  points: number;
+  played: number;
+  win: number;
+  draw: number;
+  lose: number;
+  goalDifference: number;
+}
+
+export interface NewsArticle {
+    id: string;
+    title: string;
+    source: string;
+    date: string;
+    imageUrl: string;
+    imageHint: string;
+    url: string;
+    summary: string;
+}
+
+
+// API-Football Types
+export interface APIFootballStanding {
+  rank: number;
+  team: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  points: number;
+  goalsDiff: number;
+  all: {
+    played: number;
+    win: number;
+    draw: number;
+    lose: number;
+  };
+}
+
+export interface APIFootballResponse<T> {
+  response: T[];
+}

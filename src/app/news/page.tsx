@@ -1,14 +1,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockNews } from '@/lib/news-data';
+import { getNews } from '@/lib/news';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 
-export default function NewsPage() {
+export const revalidate = 3600; // Revalidate every hour
+
+export default async function NewsPage() {
   const heroImage = getPlaceholderImage('hero-highlights');
-  const articles = mockNews; // In the future, this will come from a live API
+  const articles = await getNews();
 
   const mainArticle = articles[0];
   const otherArticles = articles.slice(1);
@@ -18,7 +20,7 @@ export default function NewsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         {mainArticle && (
           <div className="lg:col-span-2">
-            <Link href={mainArticle.url}>
+            <Link href={mainArticle.url} target="_blank" rel="noopener noreferrer">
               <Card className="overflow-hidden group h-full flex flex-col">
                 <div className="relative w-full h-64 md:h-96">
                   <Image
@@ -50,7 +52,7 @@ export default function NewsPage() {
 
         <div className="space-y-6">
            {otherArticles.slice(0, 2).map((article) => (
-             <Link href={article.url} key={article.id}>
+             <Link href={article.url} key={article.id} target="_blank" rel="noopener noreferrer">
                 <Card className="overflow-hidden group flex h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div className="relative w-1/3">
                          <Image src={article.imageUrl} alt={article.title} fill className="object-cover" data-ai-hint={article.imageHint} />
@@ -76,7 +78,7 @@ export default function NewsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {otherArticles.slice(2).map(article => (
-            <Link href={article.url} key={article.id}>
+            <Link href={article.url} key={article.id} target="_blank" rel="noopener noreferrer">
               <Card className="overflow-hidden h-full flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <CardHeader className="p-0 relative">
                   <div className="aspect-video relative">

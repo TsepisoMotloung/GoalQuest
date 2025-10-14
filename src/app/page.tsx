@@ -32,7 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import { getMatches } from '@/lib/scorebat';
 import type { Match, NewsArticle } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { mockNews } from '@/lib/news-data';
+import { getNews } from '@/lib/news';
 import { formatDistanceToNow } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { Newspaper, Search, CalendarDays } from 'lucide-react';
@@ -58,6 +58,22 @@ function MatchRowSkeleton() {
 }
 
 function FeaturedNews({ articles }: { articles: NewsArticle[] }) {
+    if (articles.length === 0) {
+        return (
+             <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Newspaper className="text-primary"/>
+                        Featured News
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">No news available right now.</p>
+                </CardContent>
+             </Card>
+        )
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -69,7 +85,7 @@ function FeaturedNews({ articles }: { articles: NewsArticle[] }) {
             <CardContent className="space-y-4">
                 {articles.slice(0, 2).map((article, index) => (
                     <div key={article.id}>
-                        <Link href={article.url} className="group">
+                        <Link href={article.url} target="_blank" rel="noopener noreferrer" className="group">
                              <div className="flex gap-4">
                                 <div className="relative w-1/3 aspect-video rounded-md overflow-hidden">
                                      <Image src={article.imageUrl} alt={article.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" data-ai-hint={article.imageHint} />
@@ -176,11 +192,14 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const fetchedMatches = await getMatches();
+      const [fetchedMatches, fetchedNews] = await Promise.all([
+          getMatches(),
+          getNews()
+      ]);
       setMatches(fetchedMatches);
       const uniqueLeagues = [...new Set(fetchedMatches.map(m => m.league.name))];
       setLeagues(uniqueLeagues);
-      setNews(mockNews);
+      setNews(fetchedNews);
       setLoading(false);
     }
     fetchData();

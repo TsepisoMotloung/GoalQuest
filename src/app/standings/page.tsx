@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Table,
@@ -25,43 +25,96 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { leagues, mockStandings } from '@/app/lib/data';
+import { leagues } from '@/app/lib/data';
 import type { Standing } from '@/app/lib/types';
 import { Medal } from 'lucide-react';
+import { getStandings } from '@/lib/football-api';
+import { Skeleton } from '@/components/ui/skeleton';
+
+
+function StandingsRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+      <TableCell>
+        <div className="flex items-center gap-4 font-medium">
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+      </TableCell>
+      <TableCell><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-6 mx-auto" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
+    </TableRow>
+  );
+}
+
 
 export default function StandingsPage() {
   const [selectedLeague, setSelectedLeague] = useState(leagues[0].id);
-  const [standings, setStandings] = useState<Standing[]>(mockStandings[leagues[0].id]);
+  const [standings, setStandings] = useState<Standing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [year, setYear] = useState(new Date().getFullYear().toString());
+
+
+  useEffect(() => {
+    async function fetchStandings() {
+      setLoading(true);
+      const fetchedStandings = await getStandings(selectedLeague, year);
+      setStandings(fetchedStandings);
+      setLoading(false);
+    }
+    fetchStandings();
+  }, [selectedLeague, year]);
 
   const handleLeagueChange = (leagueId: string) => {
     setSelectedLeague(leagueId);
-    setStandings(mockStandings[leagueId] || []);
   };
+  
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="shadow-lg">
         <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <CardTitle className="font-headline text-3xl flex items-center gap-2">
                 <Medal className="text-primary" />
                 League Standings
               </CardTitle>
-              <CardDescription>View the current table for top leagues.</CardDescription>
+              <CardDescription>View the current and past tables for top leagues.</CardDescription>
             </div>
-            <Select value={selectedLeague} onValueChange={handleLeagueChange}>
-              <SelectTrigger className="w-full md:w-[240px] mt-4 md:mt-0">
-                <SelectValue placeholder="Select a league" />
-              </SelectTrigger>
-              <SelectContent>
-                {leagues.map(league => (
-                  <SelectItem key={league.id} value={league.id}>
-                    {league.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+                 <Select value={year} onValueChange={setYear}>
+                    <SelectTrigger className="w-full md:w-[120px]">
+                        <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {years.map(y => (
+                        <SelectItem key={y} value={y.toString()}>
+                            {y}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={selectedLeague} onValueChange={handleLeagueChange}>
+                <SelectTrigger className="w-full md:w-[240px]">
+                    <SelectValue placeholder="Select a league" />
+                </SelectTrigger>
+                <SelectContent>
+                    {leagues.map(league => (
+                    <SelectItem key={league.id} value={league.id}>
+                        {league.name}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+                </Select>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -80,7 +133,9 @@ export default function StandingsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {standings.length > 0 ? (
+                {loading ? (
+                    Array.from({length: 10}).map((_, i) => <StandingsRowSkeleton key={i} />)
+                ) : standings.length > 0 ? (
                   standings.map(standing => (
                     <TableRow key={standing.rank}>
                       <TableCell className="text-center font-medium">{standing.rank}</TableCell>
@@ -101,7 +156,7 @@ export default function StandingsPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center h-24">
-                      Standings for this league are not available yet.
+                      Standings for this league and season are not available yet.
                     </TableCell>
                   </TableRow>
                 )}
