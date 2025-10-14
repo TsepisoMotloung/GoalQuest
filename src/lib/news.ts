@@ -31,7 +31,7 @@ const transformToNewsArticle = (item: NewsAPIArticle, index: number): NewsArticl
 
 
 export const getNews = async (): Promise<NewsArticle[]> => {
-    if (!process.env.NEWS_API_KEY) {
+    if (!process.env.NEXT_PUBLIC_NEWS_API_KEY) {
         console.warn("NEWS_API_KEY is not set. Returning empty array.");
         return [];
     }
@@ -42,7 +42,7 @@ export const getNews = async (): Promise<NewsArticle[]> => {
                 q: 'football OR soccer',
                 sortBy: 'publishedAt',
                 language: 'en',
-                apiKey: process.env.NEWS_API_KEY,
+                apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
                 pageSize: 20,
             }
         });
