@@ -3,6 +3,7 @@ import axios from 'axios';
 import type { NewsArticle } from './types';
 
 const NEWS_API_URL = 'https://newsapi.org/v2/everything';
+const NEWS_API_KEY = '0e805f77856d435bb15551357f4955b2';
 
 interface NewsAPIArticle {
     source: {
@@ -31,7 +32,7 @@ const transformToNewsArticle = (item: NewsAPIArticle, index: number): NewsArticl
 
 
 export const getNews = async (): Promise<NewsArticle[]> => {
-    if (!process.env.NEXT_PUBLIC_NEWS_API_KEY) {
+    if (!NEWS_API_KEY) {
         console.warn("NEWS_API_KEY is not set. Returning empty array.");
         return [];
     }
@@ -42,7 +43,7 @@ export const getNews = async (): Promise<NewsArticle[]> => {
                 q: 'football OR soccer',
                 sortBy: 'publishedAt',
                 language: 'en',
-                apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
+                apiKey: NEWS_API_KEY,
                 pageSize: 20,
             }
         });

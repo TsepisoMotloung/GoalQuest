@@ -1,14 +1,18 @@
 
 import axios from 'axios';
-import type { Standing, Football98Standing, Football98Response } from './types';
+import type { Standing } from './types';
+import type { Football98Standing, Football98Response } from './types';
+
 
 const API_FOOTBALL_URL = 'https://football98.p.rapidapi.com';
+const FOOTBALL_API_KEY = '177cde0e69msh6d0f8c4ae72902fp1dfc4ejsn8aa5e5274ab3';
+const FOOTBALL_API_HOST = 'football98.p.rapidapi.com';
 
 const api = axios.create({
   baseURL: API_FOOTBALL_URL,
   headers: {
-    'x-rapidapi-key': process.env.NEXT_PUBLIC_FOOTBALL_API_KEY,
-    'x-rapidapi-host': process.env.NEXT_PUBLIC_FOOTBALL_API_HOST
+    'x-rapidapi-key': FOOTBALL_API_KEY,
+    'x-rapidapi-host': FOOTBALL_API_HOST
   }
 });
 
@@ -49,7 +53,7 @@ export const getStandings = async (leagueName: string): Promise<Standing[]> => {
     return [];
   }
 
-  if (!process.env.NEXT_PUBLIC_FOOTBALL_API_KEY || !process.env.NEXT_PUBLIC_FOOTBALL_API_HOST) {
+  if (!FOOTBALL_API_KEY || !FOOTBALL_API_HOST) {
     console.error("Football API key or host is not set. Returning empty array.");
     return [];
   }
@@ -64,6 +68,10 @@ export const getStandings = async (leagueName: string): Promise<Standing[]> => {
     }
     return [];
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.warn(`404 Not Found for ${leagueName}. Standings may not be available for this league/season.`);
+      return [];
+    }
     console.error('Error fetching standings from football98 API:', error);
     return [];
   }

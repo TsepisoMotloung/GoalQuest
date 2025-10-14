@@ -3,6 +3,7 @@ import axios from 'axios';
 import type { Highlight, Match, ScoreBatHighlight } from './types';
 
 const SCOREBAT_API_URL = 'https://www.scorebat.com/video-api/v3/feed/';
+const SCOREBAT_API_TOKEN = 'MTg5NDhfMTcxODU1NDExOF8xMzE0ZGE5MWE3ZGI3YjZjMjdkOTU1ZmMxOTI3MGE0NmE5NzMwYmYw';
 
 const transformToHighlight = (item: ScoreBatHighlight): Highlight => {
     const matchId = item.matchviewUrl.split('/')[4] || `match-${item.title.replace(/\s/g, '-')}`;
@@ -49,14 +50,14 @@ const transformToMatch = (item: ScoreBatHighlight): Match => {
   };
 
 export const getHighlights = async (): Promise<Highlight[]> => {
-  if (!process.env.NEXT_PUBLIC_SCOREBAT_API_TOKEN) {
+  if (!SCOREBAT_API_TOKEN) {
     console.error("Scorebat API token is not set. Returning empty array.");
     return [];
   }
   try {
     const response = await axios.get<{ response: ScoreBatHighlight[] }>(SCOREBAT_API_URL, {
       params: {
-        token: process.env.NEXT_PUBLIC_SCOREBAT_API_TOKEN,
+        token: SCOREBAT_API_TOKEN,
       }
     });
 
@@ -71,14 +72,14 @@ export const getHighlights = async (): Promise<Highlight[]> => {
 };
 
 export const getMatches = async (): Promise<Match[]> => {
-    if (!process.env.NEXT_PUBLIC_SCOREBAT_API_TOKEN) {
+    if (!SCOREBAT_API_TOKEN) {
         console.error("Scorebat API token is not set. Returning empty array.");
         return [];
     }
     try {
         const response = await axios.get<{ response: ScoreBatHighlight[] }>(SCOREBAT_API_URL, {
             params: {
-                token: process.env.NEXT_PUBLIC_SCOREBAT_API_TOKEN,
+                token: SCOREBAT_API_TOKEN,
             }
         });
 
