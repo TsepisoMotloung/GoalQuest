@@ -1,3 +1,4 @@
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import type { Metadata } from 'next';
@@ -94,11 +95,16 @@ export default async function MatchPage({ params }: Props) {
               <CardTitle className="font-headline">Highlights</CardTitle>
             </CardHeader>
             <CardContent>
-              <div 
-                className="aspect-video relative rounded-lg overflow-hidden"
-                dangerouslySetInnerHTML={{ __html: match.embed || ''}}
-              >
-              </div>
+               {match.embed ? (
+                <div
+                  className="aspect-video [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:rounded-lg"
+                  dangerouslySetInnerHTML={{ __html: match.embed }}
+                />
+              ) : (
+                <div className="aspect-video w-full rounded-lg bg-muted flex items-center justify-center">
+                  <p className="text-muted-foreground">No highlights available.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
           

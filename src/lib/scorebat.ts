@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import type { Highlight, Match, ScoreBatHighlight } from './types';
 
@@ -7,7 +8,7 @@ const transformToHighlight = (item: ScoreBatHighlight): Highlight => {
     const matchId = item.matchviewUrl.split('/')[4] || `match-${item.title.replace(/\s/g, '-')}`;
     
     return {
-        id: `hl-${matchId}-${item.title.replace(/\s/g, '-')}`,
+        id: `hl-${item.title.replace(/\s/g, '-')}-${Math.random()}`,
         title: item.title,
         thumbnail: item.thumbnail,
         league: item.competition,
@@ -19,7 +20,6 @@ const transformToHighlight = (item: ScoreBatHighlight): Highlight => {
 
 const transformToMatch = (item: ScoreBatHighlight): Match => {
     const matchId = item.matchviewUrl.split('/')[4] || `match-${item.title.replace(/\s/g, '-')}`;
-    const [team1Name, team2Name] = item.title.split(' - ');
     const [score1, score2] = item.side2.name.includes('vs') ? ['0', '0'] : item.side2.name.split(' - ');
     
     return {
@@ -30,8 +30,8 @@ const transformToMatch = (item: ScoreBatHighlight): Match => {
         logoUrl: item.side1.logo,
       },
       team2: {
-        id: team2Name ? team2Name.toLowerCase().replace(/\s/g, '-') : 'tbd',
-        name: team2Name || 'TBD',
+        id: item.title.split(' - ')[1]?.toLowerCase().replace(/\s/g, '-') || 'tbd',
+        name: item.title.split(' - ')[1] || 'TBD',
         logoUrl: item.side2.logo,
       },
       score1: parseInt(score1, 10) || 0,
