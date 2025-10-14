@@ -52,7 +52,7 @@ export const getHighlights = async (): Promise<Highlight[]> => {
   try {
     const response = await axios.get<{ response: ScoreBatHighlight[] }>(SCOREBAT_API_URL, {
       params: {
-        token: process.env.SCOREBAT_EMBED_TOKEN,
+        token: process.env.SCOREBAT_API_TOKEN,
       }
     });
 
@@ -70,7 +70,7 @@ export const getMatches = async (): Promise<Match[]> => {
     try {
         const response = await axios.get<{ response: ScoreBatHighlight[] }>(SCOREBAT_API_URL, {
             params: {
-                token: process.env.SCOREBAT_EMBED_TOKEN,
+                token: process.env.SCOREBAT_API_TOKEN,
             }
         });
 
