@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { highlights, leagues } from '@/lib/data';
+import { highlights, leagues } from '@/app/lib/data';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Clapperboard } from 'lucide-react';
 

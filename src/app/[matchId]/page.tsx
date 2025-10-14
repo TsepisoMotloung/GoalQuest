@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import { matches } from '@/lib/data';
+import { matches } from '@/app/lib/data';
 import { getPlaceholderImage } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { PlayCircle, Clock, MapPin, Trophy, Users, Shirt, ArrowRightLeft, SoccerBall } from 'lucide-react';
+import { PlayCircle, Clock, MapPin, Trophy, Users, Shirt, ArrowRightLeft } from 'lucide-react';
 import { PredictionTool } from './prediction-tool';
 
 type Props = {
@@ -28,8 +28,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function FutbolIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a4.5 4.5 0 0 0-4.5 4.5 4.5 4.5 0 0 0 4.5 4.5 4.5 4.5 0 0 0 4.5-4.5A4.5 4.5 0 0 0 12 2Z" />
+      <path d="M12 2v1" />
+      <path d="M12 11v1.5" />
+      <path d="M12 22v-1" />
+      <path d="M12 13.5V12" />
+      <path d="M2.44 15.22 4.5 14" />
+      <path d="M19.5 14l2.06 1.22" />
+      <path d="M3.5 9.5 2 12l1.5 2.5" />
+      <path d="M20.5 9.5 22 12l-1.5 2.5" />
+      <path d="m9.75 4.04-.13.51" />
+      <path d="m14.25 4.04.13.51" />
+      <path d="M5.27 6.22 6.5 8" />
+      <path d="m17.5 8 1.23-1.78" />
+    </svg>
+  );
+}
+
 const eventIcons = {
-    'goal': <SoccerBall className="w-5 h-5 text-green-500" />,
+    'goal': <FutbolIcon className="w-5 h-5 text-green-500" />,
     'yellow-card': <div className="w-3 h-4 bg-yellow-400 rounded-sm" />,
     'red-card': <div className="w-3 h-4 bg-red-500 rounded-sm" />,
     'substitution': <ArrowRightLeft className="w-5 h-5 text-blue-500" />,
