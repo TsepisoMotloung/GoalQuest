@@ -12,44 +12,88 @@ export interface League {
 
 export interface Match {
   id: string;
-  team1: Team;
-  team2: Team;
+  team1: Team & {
+    stats?: {
+      possession?: number;
+      shots?: number;
+      shotsOnTarget?: number;
+      corners?: number;
+      fouls?: number;
+      yellowCards?: number;
+      redCards?: number;
+    };
+  };
+  team2: Team & {
+    stats?: {
+      possession?: number;
+      shots?: number;
+      shotsOnTarget?: number;
+      corners?: number;
+      fouls?: number;
+      yellowCards?: number;
+      redCards?: number;
+    };
+  };
   score1: number;
   score2: number;
-  status: string;
+  status: 'Live' | 'Completed' | 'Scheduled' | 'Postponed' | 'Cancelled';
   minute?: string;
-  league: League;
+  league: League & {
+    country?: string;
+    logo?: string;
+    season?: string;
+  };
   venue: string;
   date: string;
   embed: string;
+  events?: Array<{
+    type: 'Goal' | 'YellowCard' | 'RedCard' | 'Substitution';
+    minute: string;
+    team: 'team1' | 'team2';
+    player: string;
+    additionalInfo?: string;
+  }>;
+  weather?: {
+    temp?: number;
+    condition?: string;
+    humidity?: number;
+    windSpeed?: number;
+  };
+  odds?: {
+    team1Win: number;
+    draw: number;
+    team2Win: number;
+  };
+  referee?: string;
+  attendance?: number;
 }
 
 export interface Highlight {
-  id: string;
-  title: string;
-  thumbnail: string;
-  league: string;
-  date: string;
-  matchId: string;
-  embed: string;
-}
-
-// Based on Scorebat API
+    id: string;
+    title: string;
+    thumbnail: string;
+    league: string;
+    date: string;
+    matchId: string;
+    embed: string;
+    videos?: Array<{
+        id: string;
+        title: string;
+        embed: string;
+    }>;
+}// Based on Scorebat API v3
 export interface ScoreBatHighlight {
     title: string;
     competition: string;
     competitionUrl: string;
+    matchviewUrl: string;
     thumbnail: string;
     date: string;
-    matchviewUrl: string;
-    side1: { name: string, url: string, logo: string };
-    side2: { name: string, url: string, logo: string };
-    matchstatus: string;
-    matchtime: string;
-    videos: {
+    videos: Array<{
+        id: string;
         title: string;
         embed: string;
-    }[];
+    }>;
 }
 
 export interface Standing {

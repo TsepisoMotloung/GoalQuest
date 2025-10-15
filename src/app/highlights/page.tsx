@@ -12,11 +12,17 @@ export const revalidate = 60; // Revalidate every 60 seconds
 export default async function HighlightsPage({ searchParams }: { searchParams?: { league?: string } }) {
   const highlights = await getHighlights();
   const heroImage = getPlaceholderImage('hero-highlights');
-  
+
+  // Await searchParams if it's a promise (Next.js 14+ dynamic route API)
+  let selectedLeague = 'all';
+  if (typeof searchParams === 'object' && searchParams !== null && 'then' in searchParams) {
+    const awaitedParams = await searchParams;
+    selectedLeague = awaitedParams?.league || 'all';
+  } else {
+    selectedLeague = searchParams?.league || 'all';
+  }
+
   const allLeagues = [...new Set(highlights.map(h => h.league))];
-
-  const selectedLeague = searchParams?.league || 'all';
-
   const filteredHighlights = highlights.filter(highlight => {
     return selectedLeague === 'all' || highlight.league === selectedLeague;
   });
@@ -48,35 +54,45 @@ export default async function HighlightsPage({ searchParams }: { searchParams?: 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredHighlights.length > 0 ? filteredHighlights.map(highlight => (
-            <Link href={`/${highlight.matchId}`} key={highlight.id}>
-              <Card className="overflow-hidden h-full flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                <CardHeader className="p-0 relative">
-                  <div className="aspect-video relative">
-                    <Image
-                      src={highlight.thumbnail}
-                      alt={highlight.title}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      unoptimized // Scorebat images are not on a configured domain
-                      data-ai-hint="football highlight"
+          <Card key={highlight.id} className="overflow-hidden h-full flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <CardHeader className="p-0 relative">
+              <div className="aspect-video relative">
+                {highlight.embed ? (
+                  <div className="w-full h-full relative">
+                    <iframe
+                      src={`https://www.scorebat.com/embed/v/${highlight.videos?.[0]?.id}/?token=${process.env.NEXT_PUBLIC_SCOREBAT_API_TOKEN}`}
+                      className="absolute inset-0 w-full h-full rounded-lg"
+                      frameBorder="0"
+                      allowFullScreen
+                      allow="autoplay; fullscreen"
                     />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
-                    <div className="absolute top-2 right-2 bg-primary/80 text-primary-foreground rounded-full p-2 backdrop-blur-sm">
-                        <Clapperboard className="w-5 h-5"/>
-                    </div>
                   </div>
-                </CardHeader>
-                <CardContent className="flex-1 p-4">
-                  <CardTitle className="text-lg font-semibold leading-snug group-hover:text-primary transition-colors">
-                    {highlight.title}
-                  </CardTitle>
-                </CardContent>
-                <CardFooter className="p-4 pt-0 text-sm text-muted-foreground flex justify-between">
-                  <span>{highlight.league}</span>
-                  <span>{new Date(highlight.date).toLocaleDateString()}</span>
-                </CardFooter>
-              </Card>
-            </Link>
+                ) : (
+                  <Image
+                    src={highlight.thumbnail}
+                    alt={highlight.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    unoptimized
+                    data-ai-hint="football highlight"
+                  />
+                )}
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
+                <div className="absolute top-2 right-2 bg-primary/80 text-primary-foreground rounded-full p-2 backdrop-blur-sm">
+                  <Clapperboard className="w-5 h-5"/>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 p-4">
+              <CardTitle className="text-lg font-semibold leading-snug group-hover:text-primary transition-colors">
+                {highlight.title}
+              </CardTitle>
+            </CardContent>
+            <CardFooter className="p-4 pt-0 text-sm text-muted-foreground flex justify-between">
+              <span>{highlight.league}</span>
+              <span>{new Date(highlight.date).toLocaleDateString()}</span>
+            </CardFooter>
+          </Card>
         )) : (
           <p className="text-center col-span-full">No highlights available at the moment. Check back soon!</p>
         )}

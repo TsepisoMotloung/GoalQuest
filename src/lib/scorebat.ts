@@ -3,49 +3,68 @@ import axios from 'axios';
 import type { Highlight, Match, ScoreBatHighlight } from './types';
 
 const SCOREBAT_API_URL = 'https://www.scorebat.com/video-api/v3/feed/';
-const SCOREBAT_API_TOKEN = 'MTg5NDhfMTcxODU1NDExOF8xMzE0ZGE5MWE3ZGI3YjZjMjdkOTU1ZmMxOTI3MGE0NmE5NzMwYmYw';
+const SCOREBAT_API_TOKEN = process.env.NEXT_PUBLIC_SCOREBAT_API_TOKEN || '';
 
 const transformToHighlight = (item: ScoreBatHighlight): Highlight => {
     const matchId = item.matchviewUrl.split('/')[4] || `match-${item.title.replace(/\s/g, '-')}`;
     
     return {
-        id: `hl-${item.title.replace(/\s/g, '-')}-${Math.random()}`,
+        id: `hl-${item.title.replace(/\s/g, '-')}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         title: item.title,
         thumbnail: item.thumbnail,
         league: item.competition,
         date: item.date,
         matchId: matchId,
         embed: item.videos[0]?.embed || '',
+        videos: item.videos,
     };
 };
 
 const transformToMatch = (item: ScoreBatHighlight): Match => {
-    const matchId = item.matchviewUrl.split('/')[4] || `match-${item.title.replace(/\s/g, '-')}`;
-    const [score1, score2] = item.side2.name.includes('vs') ? ['0', '0'] : item.side2.name.split(' - ');
+    if (!item?.title || !item.competition) {
+        console.error('Invalid match data:', item);
+        throw new Error('Invalid match data received from API');
+    }
+
+    // Parse team names from title
+    const teamParts = item.title.split(' - ');
+    if (teamParts.length !== 2) {
+        console.error('Invalid title format:', item.title);
+        throw new Error('Invalid match title format');
+    }
+
+    const [team1Name, team2Name] = teamParts;
+    
+    // Generate a unique match ID using title and timestamp
+    const matchId = `match-${item.title.replace(/\s/g, '-').toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Score is not available in API v3, default to 0-0
+    const score1 = 0;
+    const score2 = 0;
     
     return {
-      id: matchId,
-      team1: {
-        id: item.side1.name.toLowerCase().replace(/\s/g, '-'),
-        name: item.side1.name,
-        logoUrl: item.side1.logo,
-      },
-      team2: {
-        id: item.title.split(' - ')[1]?.toLowerCase().replace(/\s/g, '-') || 'tbd',
-        name: item.title.split(' - ')[1] || 'TBD',
-        logoUrl: item.side2.logo,
-      },
-      score1: parseInt(score1, 10) || 0,
-      score2: parseInt(score2, 10) || 0,
-      status: item.matchstatus,
-      minute: item.matchstatus === 'LIVE' ? item.matchtime : undefined,
-      league: {
-        id: item.competitionUrl.split('/')[4] || 'league-unknown',
-        name: item.competition,
-      },
-      venue: 'N/A', // Not provided by this API
-      date: item.date,
-      embed: item.videos[0]?.embed || '',
+        id: matchId,
+        team1: {
+            id: team1Name.toLowerCase().replace(/\s/g, '-'),
+            name: team1Name,
+            logoUrl: `https://via.placeholder.com/50?text=${team1Name.charAt(0)}`,
+        },
+        team2: {
+            id: team2Name.toLowerCase().replace(/\s/g, '-'),
+            name: team2Name,
+            logoUrl: `https://via.placeholder.com/50?text=${team2Name.charAt(0)}`,
+        },
+        score1,
+        score2,
+        status: 'Completed', // API v3 only shows completed matches
+        minute: undefined,
+        league: {
+            id: item.competitionUrl?.split('/')[4] || 'league-unknown',
+            name: item.competition,
+        },
+        venue: 'N/A',
+        date: item.date,
+        embed: item.videos?.[0]?.embed || '',
     };
   };
 
@@ -56,8 +75,8 @@ export const getHighlights = async (): Promise<Highlight[]> => {
   }
   try {
     const response = await axios.get<{ response: ScoreBatHighlight[] }>(SCOREBAT_API_URL, {
-      params: {
-        token: SCOREBAT_API_TOKEN,
+      headers: {
+        'x-rapidapi-key': SCOREBAT_API_TOKEN
       }
     });
 
@@ -77,18 +96,51 @@ export const getMatches = async (): Promise<Match[]> => {
         return [];
     }
     try {
+        console.log('Using Scorebat Token:', SCOREBAT_API_TOKEN);
+        
         const response = await axios.get<{ response: ScoreBatHighlight[] }>(SCOREBAT_API_URL, {
-            params: {
-                token: SCOREBAT_API_TOKEN,
+            headers: {
+                'x-rapidapi-key': SCOREBAT_API_TOKEN
             }
         });
 
-        if (response.data && Array.isArray(response.data.response)) {
-             // Filter out items that are not matches (e.g., news, compilations)
-            const matchesOnly = response.data.response.filter(item => item.title.includes(' - '));
-            return matchesOnly.map(transformToMatch);
+        // Log the raw response for debugging
+        console.log('Raw API Response:', JSON.stringify(response.data, null, 2));
+
+        if (!response.data?.response) {
+            console.error('Invalid API response:', response.data);
+            return [];
         }
-        return [];
+
+        // Log a sample match data
+        if (response.data.response.length > 0) {
+            console.log('Sample Match Data:', JSON.stringify(response.data.response[0], null, 2));
+        }
+
+        // Filter valid matches with detailed logging
+        const validMatches = response.data.response
+            .filter(item => {
+                if (!item?.title?.includes(' - ')) {
+                    console.log('Filtered out item:', item);
+                    return false;
+                }
+                return true;
+            })
+            .map(item => {
+                try {
+                    console.log('Processing match:', item.title);
+                    const match = transformToMatch(item);
+                    console.log('Transformed match:', match);
+                    return match;
+                } catch (error) {
+                    console.error('Error transforming match:', error, 'Match data:', item);
+                    return null;
+                }
+            })
+            .filter((match): match is Match => match !== null);
+
+        console.log('Final matches count:', validMatches.length);
+        return validMatches;
     } catch (error) {
         console.error('Error fetching matches from ScoreBat API:', error);
         return [];

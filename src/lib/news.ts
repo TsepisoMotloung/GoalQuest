@@ -1,61 +1,58 @@
 
+
 import axios from 'axios';
 import type { NewsArticle } from './types';
 
-const NEWS_API_URL = 'https://newsapi.org/v2/everything';
-const NEWS_API_KEY = '0e805f77856d435bb15551357f4955b2';
+const MEDIASTACK_API_URL = 'http://api.mediastack.com/v1/news';
+const MEDIASTACK_API_KEY = process.env.MEDIASTACK_API_KEY || '';
 
-interface NewsAPIArticle {
-    source: {
-        id: string | null;
-        name: string;
-    };
-    author: string | null;
+interface MediastackArticle {
     title: string;
     description: string;
     url: string;
-    urlToImage: string;
-    publishedAt: string;
-    content: string;
+    image: string;
+    published_at: string;
+    source: string;
+    author: string;
+    category: string;
+    language: string;
+    country: string;
 }
 
-const transformToNewsArticle = (item: NewsAPIArticle, index: number): NewsArticle => ({
-    id: `${item.source.id || 'news'}-${index}`,
+const transformToNewsArticle = (item: MediastackArticle, index: number): NewsArticle => ({
+    id: `news-${index}`,
     title: item.title,
-    source: item.source.name,
-    date: item.publishedAt,
-    imageUrl: item.urlToImage || 'https://picsum.photos/seed/news-fallback/800/450',
+    source: item.source,
+    date: item.published_at,
+    imageUrl: item.image || 'https://picsum.photos/seed/news-fallback/800/450',
     imageHint: 'news article image',
     url: item.url,
     summary: item.description,
 });
 
-
 export const getNews = async (): Promise<NewsArticle[]> => {
-    if (!NEWS_API_KEY) {
-        console.warn("NEWS_API_KEY is not set. Returning empty array.");
+    if (!MEDIASTACK_API_KEY) {
+        console.warn('MEDIASTACK_API_KEY is not set. Returning empty array.');
         return [];
     }
-
     try {
-        const response = await axios.get<{ articles: NewsAPIArticle[] }>(NEWS_API_URL, {
+        const response = await axios.get<{ data: MediastackArticle[] }>(MEDIASTACK_API_URL, {
             params: {
-                q: 'football OR soccer',
-                sortBy: 'publishedAt',
-                language: 'en',
-                apiKey: NEWS_API_KEY,
-                pageSize: 20,
-            }
+                access_key: MEDIASTACK_API_KEY,
+                keywords: 'football,soccer',
+                languages: 'en',
+                sort: 'published_desc',
+                limit: 20,
+            },
         });
-
-        if (response.data && Array.isArray(response.data.articles)) {
-            return response.data.articles
-                .filter(article => article.urlToImage && article.description) // Ensure basic content exists
+        if (response.data && Array.isArray(response.data.data)) {
+            return response.data.data
+                .filter(article => article.image && article.description)
                 .map(transformToNewsArticle);
         }
         return [];
     } catch (error) {
-        console.error('Error fetching news from NewsAPI:', error);
+        console.error('Error fetching news from Mediastack:', error);
         return [];
     }
 };

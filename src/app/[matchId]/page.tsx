@@ -2,11 +2,76 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import { getMatch } from '@/lib/scorebat';
+import { getMatch as getScorebatMatch } from '@/lib/scorebat';
+import { getLiveMatch as getFootballLiveMatch } from '@/lib/football-api';
+import { Match as RawMatch } from '@/lib/types';
+
+// Normalizes the football-api live match response into our Match type
+function normalizeFootballMatch(raw: any): RawMatch {
+  const team1 = {
+    id: raw.match_hometeam_id ? String(raw.match_hometeam_id) : 'team1',
+    name: raw.match_hometeam_name || raw.home_team || 'Home',
+    logoUrl: raw.team_home_badge || `https://via.placeholder.com/50?text=${raw.match_hometeam_name?.charAt(0) || 'H'}`,
+  };
+
+  const team2 = {
+    id: raw.match_awayteam_id ? String(raw.match_awayteam_id) : 'team2',
+    name: raw.match_awayteam_name || raw.away_team || 'Away',
+    logoUrl: raw.team_away_badge || `https://via.placeholder.com/50?text=${raw.match_awayteam_name?.charAt(0) || 'A'}`,
+  };
+
+  // Convert statistics to the expected format
+  const statsForTeam = (side: 'home' | 'away') => {
+    return {
+      possession: 50, // Default to 50-50 possession if not available
+      shots: parseInt(side === 'home' ? raw.match_hometeam_ft_score || '0' : raw.match_awayteam_ft_score || '0'),
+      shotsOnTarget: parseInt(side === 'home' ? raw.match_hometeam_score || '0' : raw.match_awayteam_score || '0'),
+      corners: 0,
+      fouls: 0,
+      yellowCards: (raw.cards || []).filter((c: any) => 
+        (side === 'home' ? c.home_fault : !c.home_fault) && c.card === 'yellow'
+      ).length,
+      redCards: (raw.cards || []).filter((c: any) => 
+        (side === 'home' ? c.home_fault : !c.home_fault) && c.card === 'red'
+      ).length,
+    };
+  };
+
+  const events = raw.events || raw.goals || raw.cards ? [
+    ...(raw.cards || []).map((card: any) => ({
+      type: card.card === 'yellow' ? 'YellowCard' : 'RedCard',
+      minute: card.time,
+      team: card.home_fault ? 'team1' : 'team2',
+      player: card.player,
+    })),
+    ...(raw.goals || []).map((goal: any) => ({
+      type: 'Goal',
+      minute: goal.time,
+      team: goal.home_scorer ? 'team1' : 'team2',
+      player: goal.scorer,
+      additionalInfo: goal.assist || undefined,
+    })),
+  ].sort((a: any, b: any) => parseInt(a.minute) - parseInt(b.minute)) : undefined;
+
+  return {
+    id: raw.match_id ? `match-${raw.match_id}` : raw.id || `match-${Date.now()}`,
+    team1: { ...team1, stats: statsForTeam('home') },
+    team2: { ...team2, stats: statsForTeam('away') },
+    score1: parseInt(raw.match_hometeam_score) || 0,
+    score2: parseInt(raw.match_awayteam_score) || 0,
+    status: raw.match_live === '1' ? 'Live' : (raw.match_status === 'Finished' || raw.match_status === '90' ? 'Completed' : 'Scheduled'),
+    minute: raw.match_status && raw.match_status !== 'Finished' ? String(raw.match_status) : undefined,
+    league: { id: raw.league_id || 'league-unknown', name: raw.league_name || raw.competition || 'Unknown' },
+    venue: raw.match_stadium || raw.venue || 'N/A',
+    date: raw.match_date || new Date().toISOString(),
+    embed: '',
+    events,
+  } as RawMatch;
+}
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Clock, MapPin, Trophy } from 'lucide-react';
+import { Clock, MapPin, Trophy, Goal, Flag, CreditCard as CardIcon } from 'lucide-react';
 import { PredictionTool } from './prediction-tool';
 import type { Match } from '@/lib/types';
 
@@ -16,11 +81,24 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { matchId } = params;
   let match: Match | null = null;
   try {
-     match = await getMatch(params.matchId);
+    match = await getScorebatMatch(matchId);
   } catch(e) {
-    // ignore
+    console.error('ScoreBat fetch error:', e);
+  }
+
+  // Fallback: try football API when Scorebat doesn't have the match
+  if (!match) {
+    try {
+      const raw = await getFootballLiveMatch(matchId.replace('match-', ''));
+      if (raw) {
+        match = normalizeFootballMatch(raw);
+      }
+    } catch (e) {
+      console.error('Football API fetch error:', e);
+    }
   }
 
   if (!match) {
@@ -36,15 +114,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function MatchPage({ params }: Props) {
+  const { matchId } = params;
   let match: Match | null = null;
 
   try {
-     match = await getMatch(params.matchId);
+    match = await getScorebatMatch(matchId);
   } catch(e) {
-    console.error(e)
+    console.error('ScoreBat fetch error:', e);
   }
-
+ 
   if (!match) {
+    // Try football API as a fallback for matches coming from the live feed
+    try {
+      const raw = await getFootballLiveMatch(matchId.replace('match-', ''));
+      if (raw) {
+        match = normalizeFootballMatch(raw);
+      }
+    } catch (e) {
+      console.error('football-api fallback error', e);
+    }
+  }  if (!match) {
     notFound();
   }
   
